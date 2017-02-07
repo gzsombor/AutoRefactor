@@ -26,16 +26,13 @@
  */
 package org.autorefactor.jdt.internal.ui.fix;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
+import static org.autorefactor.jdt.internal.corext.dom.ASTNodes.getModifiersOnly;
+import static org.autorefactor.jdt.internal.corext.dom.ASTNodes.modifiers;
+
 import java.util.List;
 
 import org.autorefactor.jdt.internal.corext.dom.ASTNodeFactory;
 import org.autorefactor.jdt.internal.corext.dom.ASTNodes;
-import org.autorefactor.util.NotImplementedException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -46,7 +43,6 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -80,43 +76,6 @@ public class RedundantModifiersCleanUp extends AbstractCleanUpRule {
     public String getReason() {
         return MultiFixMessages.CleanUpRefactoringWizard_RedundantModifiersCleanUp_reason;
     }
-
-    private static final class ModifierOrderComparator implements Comparator<IExtendedModifier> {
-        /**
-         * Compare objects.
-         *
-         * @param o1 First item
-         * @param o2 Second item
-         *
-         * @return -1, 0 or 1
-         */
-        public int compare(IExtendedModifier o1, IExtendedModifier o2) {
-            if (o1.isAnnotation()) {
-                if (o2.isAnnotation()) {
-                    return 0;
-                }
-                return -1;
-            }
-            if (o2.isAnnotation()) {
-                return 1;
-            }
-            final int i1= ORDERED_MODIFIERS.indexOf(((Modifier) o1).getKeyword());
-            final int i2= ORDERED_MODIFIERS.indexOf(((Modifier) o2).getKeyword());
-            if (i1 == -1) {
-                throw new NotImplementedException(((Modifier) o1), "cannot determine order for modifier " + o1); //$NON-NLS-1$
-            }
-            if (i2 == -1) {
-                throw new NotImplementedException(((Modifier) o2), "cannot compare modifier " + o2); //$NON-NLS-1$
-            }
-            return i1 - i2;
-        }
-    }
-
-    private static final List<ModifierKeyword> ORDERED_MODIFIERS= Collections.unmodifiableList(Arrays.asList(
-            ModifierKeyword.PUBLIC_KEYWORD, ModifierKeyword.PROTECTED_KEYWORD, ModifierKeyword.PRIVATE_KEYWORD,
-            ModifierKeyword.ABSTRACT_KEYWORD, ModifierKeyword.STATIC_KEYWORD, ModifierKeyword.FINAL_KEYWORD,
-            ModifierKeyword.TRANSIENT_KEYWORD, ModifierKeyword.VOLATILE_KEYWORD, ModifierKeyword.SYNCHRONIZED_KEYWORD,
-            ModifierKeyword.NATIVE_KEYWORD, ModifierKeyword.STRICTFP_KEYWORD));
 
     @Override
     public boolean visit(FieldDeclaration node) {
@@ -228,8 +187,7 @@ public class RedundantModifiersCleanUp extends AbstractCleanUpRule {
 
     private boolean ensureModifiersOrder(BodyDeclaration node) {
         final List<IExtendedModifier> extendedModifiers= ASTNodes.modifiers(node);
-        final List<IExtendedModifier> reorderedModifiers= new ArrayList<>(extendedModifiers);
-        Collections.sort(reorderedModifiers, new ModifierOrderComparator());
+        final List<IExtendedModifier> reorderedModifiers = ASTNodes.reorder(extendedModifiers);
 
         if (!extendedModifiers.equals(reorderedModifiers)) {
             reorderModifiers(reorderedModifiers);
@@ -279,13 +237,4 @@ public class RedundantModifiersCleanUp extends AbstractCleanUpRule {
         return result;
     }
 
-    private List<Modifier> getModifiersOnly(Collection<IExtendedModifier> modifiers) {
-        final List<Modifier> results= new ArrayList<>();
-        for (IExtendedModifier em : modifiers) {
-            if (em.isModifier()) {
-                results.add((Modifier) em);
-            }
-        }
-        return results;
-    }
 }

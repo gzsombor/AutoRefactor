@@ -124,6 +124,7 @@ public final class AllRefactoringRules {
                 new IsEmptyRatherThanSizeRefactoring(),
                 new MapRefactoring(),
                 new EntrySetRatherThanKeySetAndValueSearchRefactoring(),
+                new EnforceStaticFinalLoggerRefactoring(),
                 new MethodOnMapRatherThanMethodOnKeySetRefactoring(),
                 new NoAssignmentInIfConditionRefactoring(),
                 new IfElseIfRefactoring(),

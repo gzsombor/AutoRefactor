@@ -90,6 +90,7 @@ import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.NullLiteral;
@@ -262,6 +263,20 @@ public final class ASTNodes {
             return true;
         }
     }
+
+    /**
+     * Boolean constant to use when returning from an
+     * {@link org.eclipse.jdt.core.dom.ASTVisitor} {{visit(*)}} method to indicate
+     * that the visitor does not want to visit a node's subtree. This helps
+     * readability.
+     */
+    public static final boolean DO_NOT_VISIT_SUBTREE= false;
+    /**
+     * Boolean constant to use when returning from an
+     * {@link org.eclipse.jdt.core.dom.ASTVisitor} {{visit(*)}} method to indicate
+     * that the visitor wants to visit a node's subtree. This helps readability.
+     */
+    public static final boolean VISIT_SUBTREE= true;
 
     private ASTNodes() {
     }
@@ -749,6 +764,32 @@ public final class ASTNodes {
     @SuppressWarnings("unchecked")
     public static List<IExtendedModifier> modifiers(VariableDeclarationStatement node) {
         return node.modifiers();
+    }
+
+    /**
+     * Method to filter {@link Modifier} from thhe collection of {@link IExtendedModifier}.
+     * @param modifiers the collection which needs to be filtered.
+     * @return a list of Modifier, without the annotations.
+     */
+    public static List<Modifier> getModifiersOnly(Collection<IExtendedModifier> modifiers) {
+        final List<Modifier> results = new ArrayList<Modifier>();
+        for (IExtendedModifier em : modifiers) {
+            if (em.isModifier()) {
+                results.add((Modifier) em);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Re-order the modifiers, and return a new list.
+     * @param modifiers list of {@link Modifier} which needs to be ordered.
+     * @return a new list with properly ordered {@link Modifier}s
+     */
+    public static List<IExtendedModifier> reorder(List<IExtendedModifier> modifiers) {
+        final List<IExtendedModifier> reorderedModifiers = new ArrayList<IExtendedModifier>(modifiers);
+        Collections.sort(reorderedModifiers, new ModifierOrderComparator());
+        return reorderedModifiers;
     }
 
     /**

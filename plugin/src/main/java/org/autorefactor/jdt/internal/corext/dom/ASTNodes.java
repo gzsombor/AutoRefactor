@@ -94,6 +94,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.NullLiteral;
@@ -122,6 +123,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 
 /**
  * Helper class for manipulating, converting, navigating and checking
@@ -307,6 +309,52 @@ public final class ASTNodes {
             return VISIT_SUBTREE;
         }
     }
+
+    private static final class ModifierOrderComparator implements Comparator<IExtendedModifier> {
+        /**
+         * Compare objects.
+         *
+         * @param o1 First item
+         * @param o2 Second item
+         *
+         * @return -1, 0 or 1
+         */
+        public int compare(IExtendedModifier o1, IExtendedModifier o2) {
+            if (o1.isAnnotation()) {
+                if (o2.isAnnotation()) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            } else if (o2.isAnnotation()) {
+                return 1;
+            } else {
+                final int i1 = ORDERED_MODIFIERS.indexOf(((Modifier) o1).getKeyword());
+                final int i2 = ORDERED_MODIFIERS.indexOf(((Modifier) o2).getKeyword());
+                if (i1 == -1) {
+                    throw new NotImplementedException(((Modifier) o1), "cannot determine order for modifier " + o1);
+                }
+                if (i2 == -1) {
+                    throw new NotImplementedException(((Modifier) o2), "cannot compare modifier " + o2);
+                }
+                return i1 - i2;
+            }
+        }
+    }
+
+    private static final List<ModifierKeyword> ORDERED_MODIFIERS = Collections.unmodifiableList(Arrays.asList(
+            ModifierKeyword.PUBLIC_KEYWORD,
+            ModifierKeyword.PROTECTED_KEYWORD,
+            ModifierKeyword.PRIVATE_KEYWORD,
+            ModifierKeyword.ABSTRACT_KEYWORD,
+            ModifierKeyword.STATIC_KEYWORD,
+            ModifierKeyword.FINAL_KEYWORD,
+            ModifierKeyword.TRANSIENT_KEYWORD,
+            ModifierKeyword.VOLATILE_KEYWORD,
+            ModifierKeyword.SYNCHRONIZED_KEYWORD,
+            ModifierKeyword.NATIVE_KEYWORD,
+            ModifierKeyword.STRICTFP_KEYWORD));
+
 
     /**
      * Boolean constant to use when returning from an
@@ -794,6 +842,32 @@ public final class ASTNodes {
     @SuppressWarnings("unchecked")
     public static List<IExtendedModifier> modifiers(VariableDeclarationStatement node) {
         return node.modifiers();
+    }
+
+    /**
+     * Method to filter {@link Modifier} from thhe collection of {@link IExtendedModifier}.
+     * @param modifiers the collection which needs to be filtered.
+     * @return a list of Modifier, without the annotations.
+     */
+    public static List<Modifier> getModifiersOnly(Collection<IExtendedModifier> modifiers) {
+        final List<Modifier> results = new ArrayList<Modifier>();
+        for (IExtendedModifier em : modifiers) {
+            if (em.isModifier()) {
+                results.add((Modifier) em);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Re-order the modifiers, and return a new list.
+     * @param modifiers list of {@link Modifier} which needs to be ordered.
+     * @return a new list with properly ordered {@link Modifier}s
+     */
+    public static List<IExtendedModifier> reorder(List<IExtendedModifier> modifiers) {
+        final List<IExtendedModifier> reorderedModifiers = new ArrayList<IExtendedModifier>(modifiers);
+        Collections.sort(reorderedModifiers, new ModifierOrderComparator());
+        return reorderedModifiers;
     }
 
     /**

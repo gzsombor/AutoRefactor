@@ -187,6 +187,9 @@ public class StandardMethodRatherThanLibraryMethodCleanUp extends NewClassImport
             importsToAdd.add("java.util.Objects"); //$NON-NLS-1$
             return false;
         }
+        if (replaceBase64(node, classesToUseWithImport, importsToAdd)) {
+            return DO_NOT_VISIT_SUBTREE;
+        }
 
         return true;
     }
@@ -209,4 +212,37 @@ public class StandardMethodRatherThanLibraryMethodCleanUp extends NewClassImport
                 : b.name("java", "util", "Objects")); //$NON-NLS-1$ $NON-NLS-2$ $NON-NLS-3$
         importsToAdd.add("java.util.Objects"); //$NON-NLS-1$
     }
+
+    private boolean replaceBase64(MethodInvocation node, final Set<String> classesToUseWithImport,
+            final Set<String> importsToAdd) {
+
+        final ASTBuilder b = this.ctx.getASTBuilder();
+        final Refactorings r = this.ctx.getRefactorings();
+
+        final Name base64 = classesToUseWithImport
+                .contains("java.util.Base64") ? b.simpleName("Base64") : b.name("java", "util", "Base64");
+
+        if (isMethod(node, "org.apache.commons.codec.binary.Base64", "encodeBase64", "byte[]")
+                || isMethod(node, "org.apache.commons.codec.binary.BaseNCodec", "encode", "byte[]")) {
+            r.replace(node, b.invoke(b.invoke(base64, "getEncoder"), "encode",
+                b.copy((Expression) node.arguments().get(0))));
+            return true;
+        }
+        if (isMethod(node, "org.apache.commons.codec.binary.Base64", "encodeBase64String", "byte[]")
+                || isMethod(node, "org.apache.commons.codec.binary.BaseNCodec", "encodeToString", "byte[]")) {
+            r.replace(node, b.invoke(b.invoke(base64, "getEncoder"), "encodeToString",
+                b.copy((Expression) node.arguments().get(0))));
+            return true;
+        }
+        if (isMethod(node, "org.apache.commons.codec.binary.Base64", "decodeBase64", "java.lang.String")
+                || isMethod(node, "org.apache.commons.codec.binary.Base64", "decodeBase64", "byte[]")
+                || isMethod(node, "org.apache.commons.codec.binary.BaseNCodec", "decode", "java.lang.String")
+                || isMethod(node, "org.apache.commons.codec.binary.BaseNCodec", "decode", "byte[]")) {
+            r.replace(node, b.invoke(b.invoke(base64, "getDecoder"), "decode",
+                b.copy((Expression) node.arguments().get(0))));
+            return true;
+        }
+        return false;
+    }
+
 }

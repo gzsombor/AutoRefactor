@@ -28,6 +28,7 @@ package org.autorefactor.jdt.internal.ui.fix.samples_out;
 import java.util.Date;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.codec.binary.Base64;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -58,4 +59,27 @@ public class StandardMethodRatherThanLibraryMethodSample {
 
         return String.valueOf(b1) + i2;
     }
+
+    public void base64Static(byte[] buffer) {
+        // Keep comment
+        byte[] result = java.util.Base64.getEncoder().encode(buffer);
+
+        String doubleEncoded = java.util.Base64.getEncoder().encodeToString(result);
+        byte[] data = java.util.Base64.getDecoder().decode(doubleEncoded);
+
+        byte[] original = java.util.Base64.getDecoder().decode(data);
+    }
+
+    public void base64Instance(byte[] buffer) {
+        // Keep comment
+        Base64 base = new Base64();
+
+        byte[] result = java.util.Base64.getEncoder().encode(buffer);
+
+        String doubleEncoded = java.util.Base64.getEncoder().encodeToString(result);
+        byte[] data = java.util.Base64.getDecoder().decode(doubleEncoded);
+
+        byte[] original = java.util.Base64.getDecoder().decode(data);
+    }
+
 }

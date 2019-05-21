@@ -28,6 +28,7 @@ package org.autorefactor.refactoring.rules.samples_in;
 import java.util.Date;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.codec.binary.Base64;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -56,4 +57,27 @@ public class StandardMethodRatherThanLibraryMethodSample {
 
         return String.valueOf(b1) + i2;
     }
+
+    public void base64Static(byte[] buffer) {
+        // Keep comment
+        byte[] result = Base64.encodeBase64(buffer);
+        
+        String doubleEncoded = Base64.encodeBase64String(result);
+        byte[] data = Base64.decodeBase64(doubleEncoded);
+        
+        byte[] original = Base64.decodeBase64(data);
+    }
+
+    public void base64Instance(byte[] buffer) {
+        // Keep comment
+        Base64 base = new Base64();
+
+        byte[] result = base.encode(buffer);
+
+        String doubleEncoded = base.encodeToString(result);
+        byte[] data = base.decode(doubleEncoded);
+
+        byte[] original = base.decode(data);
+    }
+
 }

@@ -85,6 +85,13 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.13</version>
+      <scope>test</scope>
+    </dependency>
+
 	<dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>

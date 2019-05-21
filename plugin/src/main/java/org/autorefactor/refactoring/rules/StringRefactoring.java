@@ -55,7 +55,7 @@ public class StringRefactoring extends AbstractRefactoringRule {
      * @return the name.
      */
     public String getName() {
-        return "String";
+        return "String refactoring";
     }
 
     /**

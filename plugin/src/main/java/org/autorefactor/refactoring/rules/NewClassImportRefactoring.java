@@ -52,7 +52,7 @@ public abstract class NewClassImportRefactoring extends AbstractRefactoringRule 
     /**
      * The class that does the refactoring when an import needs to be added.
      */
-    public abstract class RefactoringWithNewClassImport extends ASTVisitor {
+    public abstract static class RefactoringWithNewClassImport extends ASTVisitor {
         private Set<String> classesToUseWithImport = new HashSet<String>();
         private Set<String> importsToAdd = new HashSet<String>();
 

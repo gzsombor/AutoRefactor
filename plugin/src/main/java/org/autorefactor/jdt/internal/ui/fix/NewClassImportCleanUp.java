@@ -52,9 +52,9 @@ public abstract class NewClassImportCleanUp extends AbstractCleanUpRule {
     /**
      * The class that does the refactoring when an import needs to be added.
      */
-    public abstract class CleanUpWithNewClassImport extends ASTVisitor {
-        private Set<String> classesToUseWithImport= new HashSet<String>();
-        private Set<String> importsToAdd= new HashSet<String>();
+    public abstract static class CleanUpWithNewClassImport extends ASTVisitor {
+        private Set<String> classesToUseWithImport = new HashSet<String>();
+        private Set<String> importsToAdd = new HashSet<String>();
 
         /**
          * The imports that need to be added.

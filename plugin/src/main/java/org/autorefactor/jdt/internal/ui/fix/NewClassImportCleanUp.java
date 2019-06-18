@@ -48,7 +48,7 @@ public abstract class NewClassImportCleanUp extends AbstractCleanUpRule {
     /**
      * The class that does the cleanup when an import needs to be added.
      */
-    public abstract class CleanUpWithNewClassImport extends ASTVisitor {
+    public abstract static class CleanUpWithNewClassImport extends ASTVisitor {
         private Set<String> classesToUseWithImport= new HashSet<>();
         private Set<String> importsToAdd= new HashSet<>();
 

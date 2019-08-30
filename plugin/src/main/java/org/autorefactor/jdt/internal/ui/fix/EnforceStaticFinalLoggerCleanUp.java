@@ -25,8 +25,6 @@
  */
 package org.autorefactor.jdt.internal.ui.fix;
 
-import static org.autorefactor.jdt.internal.corext.dom.ASTNodes.DO_NOT_VISIT_SUBTREE;
-import static org.autorefactor.jdt.internal.corext.dom.ASTNodes.VISIT_SUBTREE;
 import static org.autorefactor.jdt.internal.corext.dom.ASTNodes.getModifiersOnly;
 import static org.autorefactor.jdt.internal.corext.dom.ASTNodes.modifiers;
 
@@ -35,14 +33,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.autorefactor.jdt.internal.corext.dom.ASTBuilder;
+import org.autorefactor.jdt.internal.corext.dom.ASTNodeFactory;
 import org.autorefactor.jdt.internal.corext.dom.ASTNodes;
 
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -80,20 +77,20 @@ public class EnforceStaticFinalLoggerCleanUp extends AbstractCleanUpRule {
     public boolean visit(FieldDeclaration node) {
         final Type fieldType = node.getType();
         if (!isLogger(fieldType)) {
-            return VISIT_SUBTREE;
+            return true;
         }
         for (VariableDeclarationFragment var : ASTNodes.fragments(node)) {
             if (var.getInitializer() == null) {
                 // there is no initializer for the field, it can't become a
                 // private static final field
-                return VISIT_SUBTREE;
+                return true;
             }
         }
         return markFinalStatic(node);
     }
 
     private boolean markFinalStatic(FieldDeclaration node) {
-        boolean result = VISIT_SUBTREE;
+        boolean result = true;
         boolean hasFinal = false;
         boolean hasAccess = false;
         boolean hasStatic = false;
@@ -110,26 +107,26 @@ public class EnforceStaticFinalLoggerCleanUp extends AbstractCleanUpRule {
             } else if (modifier.isPublic()) {
                 ctx.getRefactorings().remove(modifier);
                 size--;
-                result = DO_NOT_VISIT_SUBTREE;
+                result = false;
             }
 
         }
-        ASTBuilder builder = ctx.getASTBuilder();
+        final ASTNodeFactory b= ctx.getASTBuilder();
         if (!hasAccess) {
             // insert at first
-            ctx.getRefactorings().insertAt(node, FieldDeclaration.MODIFIERS2_PROPERTY, builder.private0(), 0);
+            ctx.getRefactorings().insertAt(node, FieldDeclaration.MODIFIERS2_PROPERTY, b.private0(), 0);
             size++;
-            result = DO_NOT_VISIT_SUBTREE;
+            result = false;
         }
         if (!hasStatic) {
-            ctx.getRefactorings().insertAt(node, FieldDeclaration.MODIFIERS2_PROPERTY, builder.static0(), size);
+            ctx.getRefactorings().insertAt(node, FieldDeclaration.MODIFIERS2_PROPERTY, b.static0(), size);
             size++;
-            result = DO_NOT_VISIT_SUBTREE;
+            result = false;
         }
         if (!hasFinal) {
-            ctx.getRefactorings().insertAt(node, FieldDeclaration.MODIFIERS2_PROPERTY, builder.final0(), size);
+            ctx.getRefactorings().insertAt(node, FieldDeclaration.MODIFIERS2_PROPERTY, b.final0(), size);
             size++;
-            result = DO_NOT_VISIT_SUBTREE;
+            result = false;
         }
         return result;
     }

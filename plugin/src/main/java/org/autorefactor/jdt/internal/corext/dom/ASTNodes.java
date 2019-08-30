@@ -278,20 +278,6 @@ public final class ASTNodes {
         }
     }
 
-    /**
-     * Boolean constant to use when returning from an
-     * {@link org.eclipse.jdt.core.dom.ASTVisitor} {{visit(*)}} method to indicate
-     * that the visitor does not want to visit a node's subtree. This helps
-     * readability.
-     */
-    public static final boolean DO_NOT_VISIT_SUBTREE= false;
-    /**
-     * Boolean constant to use when returning from an
-     * {@link org.eclipse.jdt.core.dom.ASTVisitor} {{visit(*)}} method to indicate
-     * that the visitor wants to visit a node's subtree. This helps readability.
-     */
-    public static final boolean VISIT_SUBTREE= true;
-
     private ASTNodes() {
     }
 

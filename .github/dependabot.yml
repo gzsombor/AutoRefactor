@@ -1,0 +1,39 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: org.eclipse.tycho:tycho-p2-repository-plugin
+    versions:
+    - 2.2.0
+  - dependency-name: org.eclipse.tycho:tycho-surefire-plugin
+    versions:
+    - 2.2.0
+  - dependency-name: org.eclipse.tycho:tycho-compiler-plugin
+    versions:
+    - 2.2.0
+  - dependency-name: org.eclipse.tycho:target-platform-configuration
+    versions:
+    - 2.2.0
+  - dependency-name: org.eclipse.tycho:tycho-maven-plugin
+    versions:
+    - 2.2.0
+  - dependency-name: org.eclipse.tycho:tycho-compiler-jdt
+    versions:
+    - 2.2.0
+  - dependency-name: org.apache.logging.log4j:log4j-api
+    versions:
+    - 2.14.0
+  - dependency-name: org.testng:testng
+    versions:
+    - 7.3.0
+  - dependency-name: org.apache.commons:commons-lang3
+    versions:
+    - "3.11"
+  - dependency-name: org.apache.maven.plugins:maven-checkstyle-plugin
+    versions:
+    - 3.1.1
